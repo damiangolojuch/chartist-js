@@ -138,9 +138,6 @@
   stroke-width: 1px;
   stroke-dasharray: 2px; }
 
-.ct-grid-background {
-  fill: none; }
-
 .ct-point {
   stroke-width: 10px;
   stroke-linecap: round; }
@@ -152,6 +149,10 @@
 .ct-area {
   stroke: none;
   fill-opacity: 0.1; }
+
+.ct-area-shadow {
+  stroke: none;
+  fill-opacity: 0.25; }
 
 .ct-bar {
   fill: none;

@@ -188,10 +188,6 @@
     @include ct-chart-grid($ct-grid-color, $ct-grid-width, $ct-grid-dasharray);
   }
 
-  .#{$ct-class-grid-background} {
-    fill: $ct-grid-background-fill;
-  }
-
   .#{$ct-class-point} {
     @include ct-chart-point($ct-point-size, $ct-point-shape);
   }
@@ -202,6 +198,11 @@
 
   .#{$ct-class-area} {
     @include ct-chart-area();
+  }
+
+  .#{$ct-class-area-shadow} {
+    stroke: none;
+    fill-opacity: 0.25;
   }
 
   .#{$ct-class-bar} {

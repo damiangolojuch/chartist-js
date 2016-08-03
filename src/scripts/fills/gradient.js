@@ -75,7 +75,7 @@
       className: className,
       offset: offset,
       stopColor: stopColor || '#000',
-      stopOpacity: stopOpacity || 1
+      stopOpacity: (+stopOpacity === stopOpacity)? stopOpacity : 1
     });
   }
 
@@ -110,8 +110,8 @@
     for (var i = 0; i < segmentsCount; i++)
     {
       var stops = [];
-      addStop(stops, 'stop1', '0%', gradientsColors[i]);
-      addStop(stops, 'stop1', '100%', gradientsColors[i+1]);
+      addStop(stops, 'stop1', '0%', gradientsColors[i], this.gradientStartOpacity);
+      addStop(stops, 'stop1', '100%', gradientsColors[i+1], this.gradientEndOpacity);
 
       gradientsId.push(createGradient(svgElement, stops, this.cords));
     }
@@ -131,6 +131,9 @@
 
     this.gradientStartColor = '#000000';
     this.gradientEndColor = '#FFFFFF';
+
+    this.gradientStartOpacity = 1;
+    this.gradientEndOpacity = 1;
   }
 
   function setGradientStartColor(color)
@@ -143,12 +146,24 @@
     this.gradientEndColor = color || this.gradientEndColor;
   }
 
+  function setGradientStartOpacity(opacity)
+  {
+    this.gradientStartOpacity = (+opacity === opacity)? opacity : this.gradientStartOpacity;
+  }
+
+  function setGradientEndOpacity(opacity)
+  {
+    this.gradientEndOpacity = (+opacity === opacity)? opacity : this.gradientEndOpacity;
+  }
+
   // Creating line chart type in Chartist namespace
   Chartist.FillGradient = Chartist.Class.extend({
     constructor: fillGradient,
     createGradients: createGradients,
     setGradientStartColor: setGradientStartColor,
-    setGradientEndColor: setGradientEndColor
+    setGradientEndColor: setGradientEndColor,
+    setGradientStartOpacity: setGradientStartOpacity,
+    setGradientEndOpacity: setGradientEndOpacity
   });
 
 }(window, document, Chartist));

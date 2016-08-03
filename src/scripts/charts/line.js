@@ -289,7 +289,7 @@
 
         });
 
-        if (options.areaFill instanceof Chartist.FillGradient) {
+        if (options.areaFill && options.areaFill.cords) {
           gradientsId = options.areaFill.createGradients(this.svg, _areas.length);
         }
 
@@ -299,6 +299,7 @@
           shadowGradient = new Chartist.FillGradient('0%', '0%', '0%', '100%');
           shadowGradient.setGradientStartColor('#FFFFFF');
           shadowGradient.setGradientEndColor('#000000');
+          shadowGradient.setGradientEndOpacity(0);
           var shadowGradientId = shadowGradient.createGradients(this.svg, 1)[0];
         }
 
@@ -308,22 +309,22 @@
               d: areaPath.stringify()
             };
             shadowAreaAttrs.style = 'fill:url(#' + shadowGradientId + ') !important;';
-            seriesElement.elem('path', shadowAreaAttrs, options.classNames.areaShadow, true);
+            seriesGroups[seriesIndex].elem('path', shadowAreaAttrs, options.classNames.areaShadow, true);
           }
 
           // For each of our newly created area paths, we'll now create path elements by stringifying our path objects
           // and adding the created DOM elements to the correct series group
-          var area = seriesGroups[seriesIndex].elem('path', {
+          var areaAttrs = {
             d: areaPath.stringify()
-          }, options.classNames.area, true).attr({
-            'values': normalizedData[seriesIndex]
-          }, Chartist.xmlNs.uri);
+          };
 
           if (gradientsId) {
             areaAttrs.style = 'fill:url(#'+ gradientsId[areaIndex] +') !important;';
           }
 
-          var area = seriesElement.elem('path', areaAttrs, options.classNames.area, true);
+          var area = seriesGroups[seriesIndex].elem('path', areaAttrs, options.classNames.area, true).attr({
+            'values': normalizedData[seriesIndex]
+          }, Chartist.xmlNs.uri);
 
           // Emit an event for each area that was drawn
           this.eventEmitter.emit('draw', {
