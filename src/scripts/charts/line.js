@@ -69,13 +69,17 @@
     showPoint: true,
     // If the line chart should draw an area
     showArea: false,
-    // The base for the area chart that will be used to close the area shape (is normally 0)    
+    // The base for the area chart that will be used to close the area shape (is normally 0)
     areaBase: 0,
+    //instance of Charsting.FillGradient
+    areaFill: undefined,
+    //if true area will be covered by shadow gradient
+    areaShadow: false,
     // Specify if the lines should be smoothed. This value can be true or false where true will result in smoothing using the default smoothing interpolation function Chartist.Interpolation.cardinal and false results in Chartist.Interpolation.none. You can also choose other smoothing / interpolation functions available in the Chartist.Interpolation module, or write your own interpolation function. Check the examples for a brief description.
     lineSmooth: true,
     // If the line chart should add a background fill to the .ct-grids group.
     showGridBackground: false,
-    // Overriding the natural low of the chart allows you to zoom in or limit the charts lowest displayed value    
+    // Overriding the natural low of the chart allows you to zoom in or limit the charts lowest displayed value
     low: undefined,
     // Overriding the natural high of the chart allows you to zoom in or limit the charts highest displayed value
     high: undefined,
@@ -99,6 +103,7 @@
       line: 'ct-line',
       point: 'ct-point',
       area: 'ct-area',
+      areaShadow: 'ct-area-shadow',
       grid: 'ct-grid',
       gridGroup: 'ct-grids',
       gridBackground: 'ct-grid-background',
@@ -154,7 +159,7 @@
     if (options.showGridBackground) {
       Chartist.createGridBackground(gridGroup, chartRect, options.classNames.gridBackground, this.eventEmitter);
     }
-    
+
     // Draw the series
     data.raw.series.forEach(function(series, seriesIndex) {
       var seriesElement = seriesGroup.elem('g');
@@ -263,8 +268,10 @@
         // We project the areaBase value into screen coordinates
         var areaBaseProjected = chartRect.y1 - axisY.projectValue(areaBase);
 
+        var gradientsId = null;
+
         // In order to form the area we'll first split the path by move commands so we can chunk it up into segments
-        path.splitByCommand('M').filter(function onlySolidSegments(pathSegment) {
+        var _areas = path.splitByCommand('M').filter(function onlySolidSegments(pathSegment) {
           // We filter only "solid" segments that contain more than one point. Otherwise there's no need for an area
           return pathSegment.pathElements.length > 1;
         }).map(function convertToArea(solidPathSegments) {
@@ -284,12 +291,41 @@
             .position(solidPathSegments.pathElements.length + 1)
             .line(lastElement.x, areaBaseProjected);
 
-        }).forEach(function createArea(areaPath) {
+        });
+
+        if (options.areaFill instanceof Chartist.FillGradient) {
+          gradientsId = options.areaFill.createGradients(this.svg, _areas.length);
+        }
+
+        var shadowGradient = null;
+
+        if (options.areaShadow) {
+          shadowGradient = new Chartist.FillGradient('0%', '0%', '0%', '100%');
+          shadowGradient.setGradientStartColor('#FFFFFF');
+          shadowGradient.setGradientEndColor('#000000');
+          var shadowGradientId = shadowGradient.createGradients(this.svg, 1)[0];
+        }
+
+        _areas.forEach(function createArea(areaPath, areaIndex) {
+          if (options.areaShadow) { //shadowLayer
+            var shadowAreaAttrs = {
+              d: areaPath.stringify()
+            };
+            shadowAreaAttrs.style = 'fill:url(#' + shadowGradientId + ') !important;';
+            seriesElement.elem('path', shadowAreaAttrs, options.classNames.areaShadow, true);
+          }
+
           // For each of our newly created area paths, we'll now create path elements by stringifying our path objects
           // and adding the created DOM elements to the correct series group
-          var area = seriesElement.elem('path', {
+          var areaAttrs = {
             d: areaPath.stringify()
-          }, options.classNames.area, true);
+          };
+
+          if (gradientsId) {
+            areaAttrs.style = 'fill:url(#'+ gradientsId[areaIndex] +') !important;';
+          }
+
+          var area = seriesElement.elem('path', areaAttrs, options.classNames.area, true);
 
           // Emit an event for each area that was drawn
           this.eventEmitter.emit('draw', {
