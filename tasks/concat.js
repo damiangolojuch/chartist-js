@@ -25,6 +25,7 @@ module.exports = function (grunt) {
           '<%= pkg.config.src %>/scripts/base.js',
           '<%= pkg.config.src %>/scripts/svg.js',
           '<%= pkg.config.src %>/scripts/svg-path.js',
+          '<%= pkg.config.src %>/scripts/fills/gradient.js',
           '<%= pkg.config.src %>/scripts/axes/axis.js',
           '<%= pkg.config.src %>/scripts/axes/linear-scale-axis.js',
           '<%= pkg.config.src %>/scripts/axes/step-axis.js',

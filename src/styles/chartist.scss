@@ -200,6 +200,11 @@
     @include ct-chart-area();
   }
 
+  .#{$ct-class-area-shadow} {
+    stroke: none;
+    fill-opacity: 0.25;
+  }
+
   .#{$ct-class-bar} {
     @include ct-chart-bar($ct-bar-width);
   }
