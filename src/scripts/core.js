@@ -876,6 +876,65 @@ var Chartist = {
     }
   };
 
+
+  Chartist.getA = function (y1, y2)
+  {
+    return Math.abs(y2-y1);
+  };
+
+  Chartist.getB = function (x1, x2)
+  {
+    return x2-x1;
+  };
+
+  Chartist.getSmallA = function (a, lineSize, newLineSize)
+  {
+    var sinA = a / lineSize;
+
+    return sinA * (lineSize - newLineSize) / 2;
+  };
+
+  Chartist.getSmallB = function (b, lineSize, newLineSize)
+  {
+    var cosA = b / lineSize;
+
+    return cosA * (newLineSize-lineSize) / 2;
+  };
+
+  Chartist.lineSize = function (x1, y1, x2, y2)
+  {
+    return Math.sqrt( Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2));
+  };
+
+  Chartist.cutLine = function (size, x1, y1, x2, y2)
+  {
+    var lineSize = Chartist.lineSize(x1, y1, x2, y2);
+    var newLineSize = lineSize - size / 2;
+
+    var a = Chartist.getA(y1, y2);
+    var b = Chartist.getB(x1, x2);
+
+    var smallA = Chartist.getSmallA(a, lineSize, newLineSize);
+    var smallB = Chartist.getSmallB(b, lineSize, newLineSize);
+
+    var y1Sign = (y1 > y2)? -1 : 1;
+
+    var sumVector =
+    {
+      x1: -smallB,
+      x2: smallB,
+      y1: y1Sign * smallA,
+      y2: (-1) * y1Sign * smallA
+    };
+
+    return {
+      x1: x1 + sumVector.x1,
+      x2: x2 + sumVector.x2,
+      y1: y1 + sumVector.y1,
+      y2: y2 + sumVector.y2
+    };
+  };
+
   /**
    * Provides options handling functionality with callback for options changes triggered by responsive options and media query matches
    *

@@ -75,6 +75,8 @@
     areaShadow: false,
     // Specify if the lines should be smoothed. This value can be true or false where true will result in smoothing using the default smoothing interpolation function Chartist.Interpolation.cardinal and false results in Chartist.Interpolation.none. You can also choose other smoothing / interpolation functions available in the Chartist.Interpolation module, or write your own interpolation function. Check the examples for a brief description.
     lineSmooth: true,
+    //space before point
+    lineScratchSize: 0,
     // Overriding the natural low of the chart allows you to zoom in or limit the charts lowest displayed value
     low: undefined,
     // Overriding the natural high of the chart allows you to zoom in or limit the charts highest displayed value
@@ -236,9 +238,45 @@
         }.bind(this));
       }
 
-      if(seriesOptions.showLine) {
+
+
+      if(seriesOptions.showLine)
+      {
+        var newPath;
+
+        if (options.areaFill && !options.lineSmooth && options.lineScratchSize)
+        {
+          newPath = path.clone();
+          newPath.clean();
+          newPath.pathElements.push(path.pathElements[0]);
+
+          for (var i = 0, length = path.pathElements.length; i < length; i++)
+          {
+            if (i == 0) continue;
+
+            var pathElement = path.pathElements[i];
+            var prevPathElement = path.pathElements[i - 1];
+
+            var _pe = Chartist.extend({}, pathElement);
+            var _peCords = Chartist.cutLine(options.lineScratchSize, prevPathElement.x, prevPathElement.y, _pe.x, _pe.y);
+
+            if (_pe.command == 'M') continue;
+
+            _pe.x = _peCords.x1;
+            _pe.y = _peCords.y1;
+            _pe.command = 'M';
+            newPath.pathElements.push(_pe);
+
+            _pe = Chartist.extend({}, pathElement);
+            _pe.x = _peCords.x2;
+            _pe.y = _peCords.y2;
+            _pe.command = 'L';
+            newPath.pathElements.push(_pe);
+          };
+        }
+
         var line = seriesGroups[seriesIndex].elem('path', {
-          d: path.stringify()
+          d: (newPath || path).stringify()
         }, options.classNames.line, true).attr({
           'values': normalizedData[seriesIndex]
         }, Chartist.xmlNs.uri);
@@ -246,7 +284,7 @@
         this.eventEmitter.emit('draw', {
           type: 'line',
           values: normalizedData[seriesIndex],
-          path: path.clone(),
+          path: (newPath || path).clone(),
           chartRect: chartRect,
           index: seriesIndex,
           series: series,

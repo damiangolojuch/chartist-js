@@ -898,6 +898,65 @@ var Chartist = {
     }
   };
 
+
+  Chartist.getA = function (y1, y2)
+  {
+    return Math.abs(y2-y1);
+  };
+
+  Chartist.getB = function (x1, x2)
+  {
+    return x2-x1;
+  };
+
+  Chartist.getSmallA = function (a, lineSize, newLineSize)
+  {
+    var sinA = a / lineSize;
+
+    return sinA * (lineSize - newLineSize) / 2;
+  };
+
+  Chartist.getSmallB = function (b, lineSize, newLineSize)
+  {
+    var cosA = b / lineSize;
+
+    return cosA * (newLineSize-lineSize) / 2;
+  };
+
+  Chartist.lineSize = function (x1, y1, x2, y2)
+  {
+    return Math.sqrt( Math.pow(y2 - y1, 2) + Math.pow(x2 - x1, 2));
+  };
+
+  Chartist.cutLine = function (size, x1, y1, x2, y2)
+  {
+    var lineSize = Chartist.lineSize(x1, y1, x2, y2);
+    var newLineSize = lineSize - size / 2;
+
+    var a = Chartist.getA(y1, y2);
+    var b = Chartist.getB(x1, x2);
+
+    var smallA = Chartist.getSmallA(a, lineSize, newLineSize);
+    var smallB = Chartist.getSmallB(b, lineSize, newLineSize);
+
+    var y1Sign = (y1 > y2)? -1 : 1;
+
+    var sumVector =
+    {
+      x1: -smallB,
+      x2: smallB,
+      y1: y1Sign * smallA,
+      y2: (-1) * y1Sign * smallA
+    };
+
+    return {
+      x1: x1 + sumVector.x1,
+      x2: x2 + sumVector.x2,
+      y1: y1 + sumVector.y1,
+      y2: y2 + sumVector.y2
+    };
+  };
+
   /**
    * Provides options handling functionality with callback for options changes triggered by responsive options and media query matches
    *
@@ -2365,6 +2424,17 @@ var Chartist = {
   }
 
   /**
+   * Removes all elements from the path
+   *
+   * @memberof Chartist.Svg.Path
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function clean() {
+    this.pathElements.splice(0, this.pathElements.length);
+    return this;
+  }
+
+  /**
    * Use this function to add a new move SVG path element.
    *
    * @memberof Chartist.Svg.Path
@@ -2641,6 +2711,7 @@ var Chartist = {
     constructor: SvgPath,
     position: position,
     remove: remove,
+    clean: clean,
     move: move,
     line: line,
     curve: curve,
@@ -3012,6 +3083,8 @@ var Chartist = {
     areaShadow: false,
     // Specify if the lines should be smoothed. This value can be true or false where true will result in smoothing using the default smoothing interpolation function Chartist.Interpolation.cardinal and false results in Chartist.Interpolation.none. You can also choose other smoothing / interpolation functions available in the Chartist.Interpolation module, or write your own interpolation function. Check the examples for a brief description.
     lineSmooth: true,
+    //space before point
+    lineScratchSize: 0,
     // Overriding the natural low of the chart allows you to zoom in or limit the charts lowest displayed value
     low: undefined,
     // Overriding the natural high of the chart allows you to zoom in or limit the charts highest displayed value
@@ -3173,9 +3246,45 @@ var Chartist = {
         }.bind(this));
       }
 
-      if(seriesOptions.showLine) {
+
+
+      if(seriesOptions.showLine)
+      {
+        var newPath;
+
+        if (options.areaFill && !options.lineSmooth && options.lineScratchSize)
+        {
+          newPath = path.clone();
+          newPath.clean();
+          newPath.pathElements.push(path.pathElements[0]);
+
+          for (var i = 0, length = path.pathElements.length; i < length; i++)
+          {
+            if (i == 0) continue;
+
+            var pathElement = path.pathElements[i];
+            var prevPathElement = path.pathElements[i - 1];
+
+            var _pe = Chartist.extend({}, pathElement);
+            var _peCords = Chartist.cutLine(options.lineScratchSize, prevPathElement.x, prevPathElement.y, _pe.x, _pe.y);
+
+            if (_pe.command == 'M') continue;
+
+            _pe.x = _peCords.x1;
+            _pe.y = _peCords.y1;
+            _pe.command = 'M';
+            newPath.pathElements.push(_pe);
+
+            _pe = Chartist.extend({}, pathElement);
+            _pe.x = _peCords.x2;
+            _pe.y = _peCords.y2;
+            _pe.command = 'L';
+            newPath.pathElements.push(_pe);
+          };
+        }
+
         var line = seriesGroups[seriesIndex].elem('path', {
-          d: path.stringify()
+          d: (newPath || path).stringify()
         }, options.classNames.line, true).attr({
           'values': normalizedData[seriesIndex]
         }, Chartist.xmlNs.uri);
@@ -3183,7 +3292,7 @@ var Chartist = {
         this.eventEmitter.emit('draw', {
           type: 'line',
           values: normalizedData[seriesIndex],
-          path: path.clone(),
+          path: (newPath || path).clone(),
           chartRect: chartRect,
           index: seriesIndex,
           series: series,

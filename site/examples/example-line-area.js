@@ -11,5 +11,15 @@ new Chartist.Line('.ct-chart', {
   low: 0,
   showArea: true,
   areaShadow: true,
-  areaFill: gradient
+  axisY: {
+    // If labels should be shown or not
+    showLabel: 0,
+    // If the axis grid should be drawn or not
+    showGrid: 0
+  },
+  lineSmooth: false,
+
+  areaFill: gradient,
+  lineScratchSize: 50
+
 });

@@ -91,6 +91,17 @@
   }
 
   /**
+   * Removes all elements from the path
+   *
+   * @memberof Chartist.Svg.Path
+   * @return {Chartist.Svg.Path} The current path object for easy call chaining.
+   */
+  function clean() {
+    this.pathElements.splice(0, this.pathElements.length);
+    return this;
+  }
+
+  /**
    * Use this function to add a new move SVG path element.
    *
    * @memberof Chartist.Svg.Path
@@ -367,6 +378,7 @@
     constructor: SvgPath,
     position: position,
     remove: remove,
+    clean: clean,
     move: move,
     line: line,
     curve: curve,
