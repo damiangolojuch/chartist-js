@@ -3081,6 +3081,8 @@ var Chartist = {
     areaFill: undefined,
     //if true area will be covered by shadow gradient
     areaShadow: false,
+    //
+    areaPickUp: 0,
     // Specify if the lines should be smoothed. This value can be true or false where true will result in smoothing using the default smoothing interpolation function Chartist.Interpolation.cardinal and false results in Chartist.Interpolation.none. You can also choose other smoothing / interpolation functions available in the Chartist.Interpolation module, or write your own interpolation function. Check the examples for a brief description.
     lineSmooth: true,
     //space before point
@@ -3350,6 +3352,13 @@ var Chartist = {
         }
 
         _areas.forEach(function createArea(areaPath, areaIndex) {
+
+          if (options.areaPickUp) {
+            areaPath.pathElements.forEach(function (element) {
+              element.y -= options.areaPickUp;
+            });
+          }
+
           if (options.areaShadow) { //shadowLayer
             var shadowAreaAttrs = {
               d: areaPath.stringify()
