@@ -334,6 +334,7 @@
         }
 
         var shadowGradient = null;
+        var pathName = window.location.pathname;
 
         if (options.areaShadow) {
           shadowGradient = new Chartist.FillGradient('0%', '0%', '0%', '100%');
@@ -355,7 +356,7 @@
             var shadowAreaAttrs = {
               d: areaPath.stringify()
             };
-            shadowAreaAttrs.style = 'fill:url(#' + shadowGradientId + ') !important;';
+            shadowAreaAttrs.style = 'fill:url(' + pathName + '#' + shadowGradientId + ') !important;';
             seriesGroups[seriesIndex].elem('path', shadowAreaAttrs, options.classNames.areaShadow, true);
           }
 
@@ -366,7 +367,7 @@
           };
 
           if (gradientsId) {
-            areaAttrs.style = 'fill:url(#'+ gradientsId[areaIndex] +') !important;';
+            areaAttrs.style = 'fill:url(' + pathName + '#'+ gradientsId[areaIndex] +') !important;';
           }
 
           var area = seriesGroups[seriesIndex].elem('path', areaAttrs, options.classNames.area, true).attr({

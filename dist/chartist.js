@@ -2813,7 +2813,14 @@ var Chartist = {
   {
     var gradientId = 'gradient_' + makeid(20);
 
-    var gradient = svgElement.elem('linearGradient', {
+    var defs = svgElement.querySelector('defs');
+
+    if (!defs)
+    {
+      defs = svgElement.elem('defs');
+    }
+
+    var gradient = defs.elem('linearGradient', {
       id: gradientId,
       x1: cords.x1,
       y1: cords.y1,
@@ -3342,6 +3349,7 @@ var Chartist = {
         }
 
         var shadowGradient = null;
+        var pathName = window.location.pathname;
 
         if (options.areaShadow) {
           shadowGradient = new Chartist.FillGradient('0%', '0%', '0%', '100%');
@@ -3363,7 +3371,7 @@ var Chartist = {
             var shadowAreaAttrs = {
               d: areaPath.stringify()
             };
-            shadowAreaAttrs.style = 'fill:url(#' + shadowGradientId + ') !important;';
+            shadowAreaAttrs.style = 'fill:url(' + pathName + '#' + shadowGradientId + ') !important;';
             seriesGroups[seriesIndex].elem('path', shadowAreaAttrs, options.classNames.areaShadow, true);
           }
 
@@ -3374,7 +3382,7 @@ var Chartist = {
           };
 
           if (gradientsId) {
-            areaAttrs.style = 'fill:url(#'+ gradientsId[areaIndex] +') !important;';
+            areaAttrs.style = 'fill:url(' + pathName + '#'+ gradientsId[areaIndex] +') !important;';
           }
 
           var area = seriesGroups[seriesIndex].elem('path', areaAttrs, options.classNames.area, true).attr({

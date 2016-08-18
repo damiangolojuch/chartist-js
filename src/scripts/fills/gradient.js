@@ -83,7 +83,14 @@
   {
     var gradientId = 'gradient_' + makeid(20);
 
-    var gradient = svgElement.elem('linearGradient', {
+    var defs = svgElement.querySelector('defs');
+
+    if (!defs)
+    {
+      defs = svgElement.elem('defs');
+    }
+
+    var gradient = defs.elem('linearGradient', {
       id: gradientId,
       x1: cords.x1,
       y1: cords.y1,
