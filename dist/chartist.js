@@ -3079,7 +3079,7 @@ var Chartist = {
     createLine(serie, linesArea, this.linesOffsetLine);
     this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
     createPathElement(serie, linesAreaOriginal, this.getNextGradient());
-    this.emitEmptyPoints(linesAreaOriginal);
+    this.emitEmptyPoints(serie, linesAreaOriginal);
 
     return linesArea;
   }
@@ -3111,8 +3111,8 @@ var Chartist = {
     createLine(serie, linesArea, this.linesOffsetLine);
     this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
     createPathElement(serie, linesAreaOriginal, this.getNextGradient());
-    this.emitEmptyPoints(linesAreaOriginal);
-    
+    this.emitEmptyPoints(serie, linesAreaOriginal);
+
     return linesArea;
   }
 
@@ -3131,7 +3131,7 @@ var Chartist = {
     return _count;
   }
 
-  function emitEmptyPoints(linesArea)
+  function emitEmptyPoints(serie, linesArea)
   {
     var step = this.axisX.stepLength;
     var start = linesArea.x1 + step;
@@ -3141,14 +3141,16 @@ var Chartist = {
     {
       this.emitter.emit('draw', {
         type: 'emptyPoint',
-        x: i
+        x: i,
+        group: serie
       });
     }
 
     this.emitter.emit('draw', {
       type: 'emptyLine',
       x1: linesArea.x1,
-      x2: linesArea.x2
+      x2: linesArea.x2,
+      group: serie
     });
   }
 
@@ -3174,7 +3176,7 @@ var Chartist = {
     createPathElement(serie, linesArea, this.getNextGradient(), function (serie, linesArea)
     {
       self.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
-      self.emitEmptyPoints(linesArea);
+      self.emitEmptyPoints(serie, linesArea);
     });
   }
 
