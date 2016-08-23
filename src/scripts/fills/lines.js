@@ -41,7 +41,7 @@
 
 
       var pString = ' M' + currentX + ',' + currentY1;
-      pString += 'L'+ currentX + ',' + this.chartMaxY;
+      pString += 'L'+ currentX + ',' + (this.chartMaxY - this.linesOffsetYBottom);
       linesArea.push(pString)
     }
 
@@ -173,6 +173,7 @@
     createLine(serie, linesArea, this.linesOffsetLine);
     this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
     createPathElement(serie, linesAreaOriginal, this.getNextGradient());
+    this.emitEmptyPoints(linesAreaOriginal);
 
     return linesArea;
   }
@@ -204,6 +205,7 @@
     createLine(serie, linesArea, this.linesOffsetLine);
     this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
     createPathElement(serie, linesAreaOriginal, this.getNextGradient());
+    this.emitEmptyPoints(linesAreaOriginal);
 
     return linesArea;
   }
@@ -221,6 +223,27 @@
     }
 
     return _count;
+  }
+
+  function emitEmptyPoints(linesArea)
+  {
+    var step = this.axisX.stepLength;
+    var start = linesArea.x1 + step;
+    var stop = linesArea.x2;
+
+    for (var i = start; i < stop; i+= step)
+    {
+      this.emitter.emit('draw', {
+        type: 'emptyPoint',
+        x: i
+      });
+    }
+
+    this.emitter.emit('draw', {
+      type: 'emptyLine',
+      x1: linesArea.x1,
+      x2: linesArea.x2
+    });
   }
 
   function createFillLines(serie, areaIndex)
@@ -245,6 +268,7 @@
     createPathElement(serie, linesArea, this.getNextGradient(), function (serie, linesArea)
     {
       self.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
+      self.emitEmptyPoints(linesArea);
     });
   }
 
@@ -285,19 +309,24 @@
     this.lineSpace = 10;
     this.linesOffset = 6;
     this.linesOffsetY = 2;
+    this.linesOffsetYBottom = 0;
     this.linesOffsetLine = 2;
 
     this.gradientColor1 = null;
     this.gradientColor2 = null;
   }
 
-  function setChartValues(svg, areas, chartMinX, chartMaxX, chartMaxY, chartMinY)
+  function setChartValues(svg, emitter, axisX, axisY, areas, chartMinX, chartMaxX, chartMaxY, chartMinY)
   {
     this.svg = svg;
+    this.emitter = emitter;
     this.areas = areas;
     this.areasCount = areas.length - 1;
     this.chartMaxY = chartMaxY;
     this.chartMinY = chartMinY;
+
+    this.axisX = axisX;
+    this.axisY = axisY;
 
     this.chartMinX = chartMinX;
     this.chartMaxX = chartMaxX;
@@ -321,6 +350,11 @@
   function setLinesOffsetY(offset)
   {
     this.linesOffsetY = offset;
+  }
+
+  function setLinesOffsetYBottom(offset)
+  {
+    this.linesOffsetYBottom = offset;
   }
 
   function setLinesOffsetLine(offset)
@@ -347,6 +381,7 @@
     setLinesOffset: setLinesOffset,
     setLinesOffsetY: setLinesOffsetY,
     setLinesOffsetLine: setLinesOffsetLine,
+    setLinesOffsetYBottom: setLinesOffsetYBottom,
     setChartValues: setChartValues,
     setShadowGradient: setShadowGradient,
     setSerieValues: setSerieValues,
@@ -366,7 +401,8 @@
     createGradientShadow: createGradientShadow,
     generateAreaPathString: generateAreaPathString,
     countLineAreas: countLineAreas,
-    getNextGradient: getNextGradient
+    getNextGradient: getNextGradient,
+    emitEmptyPoints: emitEmptyPoints
   });
 
 }(window, document, Chartist));
