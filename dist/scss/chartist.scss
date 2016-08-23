@@ -235,3 +235,22 @@
     }
   }
 }
+
+.ct-fill-lines-line
+{
+  stroke:#5184AF;
+  stroke-width:6;
+  stroke-linecap:square;
+  stroke-dasharray:1, 18;
+}
+
+.ct-fill-lines-area
+{
+  stroke: #000 !important;
+  stroke-width: 5;
+}
+
+.ct-fill-lines-line-cover {
+  stroke:#000000;
+  stroke-width:10;
+}

@@ -75,6 +75,8 @@
     areaShadow: false,
     //
     areaPickUp: 0,
+    //
+    fillEmptySpace: null,
     // Specify if the lines should be smoothed. This value can be true or false where true will result in smoothing using the default smoothing interpolation function Chartist.Interpolation.cardinal and false results in Chartist.Interpolation.none. You can also choose other smoothing / interpolation functions available in the Chartist.Interpolation module, or write your own interpolation function. Check the examples for a brief description.
     lineSmooth: true,
     //space before point
@@ -344,7 +346,22 @@
           var shadowGradientId = shadowGradient.createGradients(this.svg, 1)[0];
         }
 
+        if (options.fillEmptySpace)
+        {
+          options.fillEmptySpace.setChartValues(this.svg, _areas, chartRect.x1, chartRect.x2 - axisX.gridOffset * 2, chartRect.y1, chartRect.y2);
+          options.fillEmptySpace.setSerieValues(normalizedData[seriesIndex]);
+
+          if (_areas.length === 0)
+          {
+            options.fillEmptySpace.createFillLines(seriesGroups[seriesIndex], 0);
+          }
+        }
+
         _areas.forEach(function createArea(areaPath, areaIndex) {
+          if (options.fillEmptySpace)
+          {
+            options.fillEmptySpace.createFillLines(seriesGroups[seriesIndex], areaIndex);
+          }
 
           if (options.areaPickUp) {
             areaPath.pathElements.forEach(function (element) {
