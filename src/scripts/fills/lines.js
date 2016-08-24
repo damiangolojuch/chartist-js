@@ -173,7 +173,7 @@
     createLine(serie, linesArea, this.linesOffsetLine);
     this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
     createPathElement(serie, linesAreaOriginal, this.getNextGradient());
-    this.emitEmptyPoints(serie, linesAreaOriginal);
+    this.emitEmptyPoints(serie, linesAreaOriginal, 'left');
 
     return linesArea;
   }
@@ -205,7 +205,7 @@
     createLine(serie, linesArea, this.linesOffsetLine);
     this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
     createPathElement(serie, linesAreaOriginal, this.getNextGradient());
-    this.emitEmptyPoints(serie, linesAreaOriginal);
+    this.emitEmptyPoints(serie, linesAreaOriginal, 'right');
 
     return linesArea;
   }
@@ -225,11 +225,14 @@
     return _count;
   }
 
-  function emitEmptyPoints(serie, linesArea)
+  function emitEmptyPoints(serie, linesArea, type)
   {
     var step = this.axisX.stepLength;
-    var start = linesArea.x1 + step;
+    var start = linesArea.x1;
     var stop = linesArea.x2;
+
+    start += (type == 'left')? 0 : step;
+    stop += (type == 'right')? step : 0;
 
     for (var i = start; i < stop; i+= step)
     {

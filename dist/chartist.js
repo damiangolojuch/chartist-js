@@ -3079,7 +3079,7 @@ var Chartist = {
     createLine(serie, linesArea, this.linesOffsetLine);
     this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
     createPathElement(serie, linesAreaOriginal, this.getNextGradient());
-    this.emitEmptyPoints(serie, linesAreaOriginal);
+    this.emitEmptyPoints(serie, linesAreaOriginal, 'left');
 
     return linesArea;
   }
@@ -3111,7 +3111,7 @@ var Chartist = {
     createLine(serie, linesArea, this.linesOffsetLine);
     this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
     createPathElement(serie, linesAreaOriginal, this.getNextGradient());
-    this.emitEmptyPoints(serie, linesAreaOriginal);
+    this.emitEmptyPoints(serie, linesAreaOriginal, 'right');
 
     return linesArea;
   }
@@ -3131,11 +3131,14 @@ var Chartist = {
     return _count;
   }
 
-  function emitEmptyPoints(serie, linesArea)
+  function emitEmptyPoints(serie, linesArea, type)
   {
     var step = this.axisX.stepLength;
-    var start = linesArea.x1 + step;
+    var start = linesArea.x1;
     var stop = linesArea.x2;
+
+    start += (type == 'left')? 0 : step;
+    stop += (type == 'right')? step : 0;
 
     for (var i = start; i < stop; i+= step)
     {
@@ -3773,7 +3776,7 @@ var Chartist = {
 
         if (options.fillEmptySpace)
         {
-          options.fillEmptySpace.setChartValues(this.svg, this.eventEmitter, axisX, axisY, _areas, chartRect.x1, chartRect.x2 - axisX.gridOffset * 2, chartRect.y1, chartRect.y2);
+          options.fillEmptySpace.setChartValues(this.svg, this.eventEmitter, axisX, axisY, _areas, chartRect.x1, chartRect.x2, chartRect.y1, chartRect.y2);
           options.fillEmptySpace.setSerieValues(normalizedData[seriesIndex]);
 
           if (_areas.length === 0)

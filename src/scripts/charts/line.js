@@ -348,7 +348,7 @@
 
         if (options.fillEmptySpace)
         {
-          options.fillEmptySpace.setChartValues(this.svg, this.eventEmitter, axisX, axisY, _areas, chartRect.x1, chartRect.x2 - axisX.gridOffset * 2, chartRect.y1, chartRect.y2);
+          options.fillEmptySpace.setChartValues(this.svg, this.eventEmitter, axisX, axisY, _areas, chartRect.x1, chartRect.x2, chartRect.y1, chartRect.y2);
           options.fillEmptySpace.setSerieValues(normalizedData[seriesIndex]);
 
           if (_areas.length === 0)
