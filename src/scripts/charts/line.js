@@ -198,6 +198,8 @@
         });
       }.bind(this));
 
+      var points = [];
+
       var seriesOptions = {
         lineSmooth: Chartist.getSeriesOption(series, options, 'lineSmooth'),
         showPoint: Chartist.getSeriesOption(series, options, 'showPoint'),
@@ -226,6 +228,11 @@
             'value': pathElement.data.value,
             'meta': pathElement.data.meta
           }, Chartist.xmlNs.uri);
+
+          points.push({
+            x: pathElement.x,
+            y: pathElement.y,
+          });
 
           this.eventEmitter.emit('draw', {
             type: 'point',
@@ -350,6 +357,7 @@
         {
           options.fillEmptySpace.setChartValues(this.svg, this.eventEmitter, axisX, axisY, _areas, chartRect.x1, chartRect.x2, chartRect.y1, chartRect.y2);
           options.fillEmptySpace.setSerieValues(normalizedData[seriesIndex]);
+          options.fillEmptySpace.setPoints(points);
 
           if (_areas.length === 0)
           {

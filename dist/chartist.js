@@ -3062,26 +3062,29 @@ var Chartist = {
     var maxX = (firstElement)? firstElement.x : this.chartMaxX;
     var maxY = (firstElement)? firstElement.y : this.chartMinY;
 
-    var pathString = this.generatePathString(this.chartMinX, maxX, this.chartMinY, maxY);
+    var self = this;
 
-    var linesAreaOriginal = {
-      area: pathString,
-      x1: this.chartMinX,
-      x2: maxX,
-      y1: this.chartMinY,
-      y2: maxY,
-    };
+    return this.preparePoints(this.chartMinX, maxX, this.chartMinY, maxY, function (x1, x2, y1, y2)
+    {
+      var pathString = self.generatePathString(x1, x2, y1, y2);
 
-    var linesArea = Chartist.extend({}, linesAreaOriginal);
-    linesArea.x1 += this.linesOffset;
-    linesArea.x2 -= this.linesOffset;
+      var linesAreaOriginal = {
+        area: pathString,
+        x1: x1,
+        x2: x2,
+        y1: y1,
+        y2: y2,
+      };
 
-    createLine(serie, linesArea, this.linesOffsetLine);
-    this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
-    createPathElement(serie, linesAreaOriginal, this.getNextGradient());
-    this.emitEmptyPoints(serie, linesAreaOriginal, 'left');
+      var linesArea = Chartist.extend({}, linesAreaOriginal);
+      linesArea.x1 += self.linesOffset;
+      linesArea.x2 -= self.linesOffset;
 
-    return linesArea;
+      createLine(serie, linesArea, self.linesOffsetLine);
+      self.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
+      createPathElement(serie, linesAreaOriginal, self.getNextGradient());
+      self.emitEmptyPoints(serie, linesAreaOriginal, 'left');
+    });
   }
 
   function hasSerieSpaceRight()
@@ -3092,28 +3095,31 @@ var Chartist = {
   function fillChartSpaceRight(serie)
   {
     var lastElement = this.areas[this.areas.length - 1].pathElements;
-    lastElement = lastElement[ lastElement.length - 2 ];
+    lastElement = lastElement[lastElement.length - 2];
 
-    var pathString = this.generatePathString(lastElement.x, this.chartMaxX, lastElement.y, this.chartMinY);
+    var self = this;
+    return this.preparePoints(lastElement.x, this.chartMaxX, lastElement.y, this.chartMinY, function (x1, x2, y1, y2)
+    {
+      var pathString = self.generatePathString(x1, x2, y1, y2);
 
-    var linesAreaOriginal = {
-      area: pathString,
-      x1: lastElement.x,
-      x2: this.chartMaxX,
-      y1: lastElement.y,
-      y2: this.chartMinY
-    };
+      var linesAreaOriginal = {
+        area: pathString,
+        x1: x1,
+        x2: x2,
+        y1: y1,
+        y2: y2,
+      };
 
-    var linesArea = Chartist.extend({}, linesAreaOriginal);
-    linesArea.x1 += this.linesOffset;
-    linesArea.x2 -= this.linesOffset;
+      var linesArea = Chartist.extend({}, linesAreaOriginal);
+      linesArea.x1 += self.linesOffset;
+      linesArea.x2 -= self.linesOffset;
 
-    createLine(serie, linesArea, this.linesOffsetLine);
-    this.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
-    createPathElement(serie, linesAreaOriginal, this.getNextGradient());
-    this.emitEmptyPoints(serie, linesAreaOriginal, 'right');
+      createLine(serie, linesArea, self.linesOffsetLine);
+      self.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
+      createPathElement(serie, linesAreaOriginal, self.getNextGradient());
+      self.emitEmptyPoints(serie, linesAreaOriginal, 'right');
 
-    return linesArea;
+    });
   }
 
   function countLineAreas()
@@ -3157,6 +3163,62 @@ var Chartist = {
     });
   }
 
+  function preparePoints(x1, x2, y1, y2, $callback)
+  {
+    var areas = [],
+      lastPoint = {
+        x: x1,
+        y: y1
+      };
+
+    for (var i = 0; i < this.points.length; i++)
+    {
+      var p = this.points[i];
+
+      if (x1 < p.x && p.x < x2)
+      {
+        areas.push({
+          x1: lastPoint.x,
+          y1: lastPoint.y,
+          x2: p.x,
+          y2: p.y
+        });
+
+        lastPoint.x = p.x;
+        lastPoint.y = p.y;
+      }
+    }
+
+    if (areas.length === 0)
+    {
+      areas.push({
+        x1: x1,
+        y1: y1,
+        x2: x2,
+        y2: y2
+      });
+    }
+    else
+    {
+      areas.push({
+        x1: lastPoint.x,
+        y1: lastPoint.y,
+        x2: x2,
+        y2: y2
+      });
+    }
+
+    if (typeof $callback == 'function')
+    {
+      for (var i in areas)
+      {
+        $callback(areas[i].x1, areas[i].x2, areas[i].y1, areas[i].y2);
+      }
+    }
+
+    return areas;
+  }
+
   function createFillLines(serie, areaIndex)
   {
     var self = this;
@@ -3175,12 +3237,26 @@ var Chartist = {
       this.fillChartSpaceRight(serie);
     }
 
-    createLine(serie, linesArea, this.linesOffsetLine);
-    createPathElement(serie, linesArea, this.getNextGradient(), function (serie, linesArea)
+    if (!linesArea) return;
+
+    return this.preparePoints(linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2, function (x1, x2, y1, y2)
     {
-      self.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
-      self.emitEmptyPoints(serie, linesArea);
+      var linesArea = {
+        area: self.generatePathString(x1, x2, y1, y2),
+        x1: x1,
+        x2: x2,
+        y1: y1,
+        y2: y2,
+      };
+
+      createLine(serie, linesArea, self.linesOffsetLine);
+      createPathElement(serie, linesArea, self.getNextGradient(), function (serie, linesArea)
+      {
+        self.createGradientShadow(serie, linesArea.x1, linesArea.x2, linesArea.y1, linesArea.y2);
+        self.emitEmptyPoints(serie, linesArea);
+      });
     });
+
   }
 
   function beforeFirstFillLines()
@@ -3284,6 +3360,11 @@ var Chartist = {
     this.linesGradient = gradient;
   }
 
+  function setPoints(points)
+  {
+    this.points = points;
+  }
+
   // Creating line chart type in Chartist namespace
   Chartist.FillLines = Chartist.Class.extend({
     constructor: fillLines,
@@ -3298,6 +3379,7 @@ var Chartist = {
     setSerieValues: setSerieValues,
     setLinesGradient: setLinesGradient,
     beforeFirstFillLines: beforeFirstFillLines,
+    setPoints: setPoints,
 
     getLastPrevAreaElement: getLastPrevAreaElement,
     getFirstCurrentAreaElement: getFirstCurrentAreaElement,
@@ -3313,7 +3395,8 @@ var Chartist = {
     generateAreaPathString: generateAreaPathString,
     countLineAreas: countLineAreas,
     getNextGradient: getNextGradient,
-    emitEmptyPoints: emitEmptyPoints
+    emitEmptyPoints: emitEmptyPoints,
+    preparePoints: preparePoints
   });
 
 }(window, document, Chartist));
@@ -3626,6 +3709,8 @@ var Chartist = {
         });
       }.bind(this));
 
+      var points = [];
+
       var seriesOptions = {
         lineSmooth: Chartist.getSeriesOption(series, options, 'lineSmooth'),
         showPoint: Chartist.getSeriesOption(series, options, 'showPoint'),
@@ -3654,6 +3739,11 @@ var Chartist = {
             'value': pathElement.data.value,
             'meta': pathElement.data.meta
           }, Chartist.xmlNs.uri);
+
+          points.push({
+            x: pathElement.x,
+            y: pathElement.y,
+          });
 
           this.eventEmitter.emit('draw', {
             type: 'point',
@@ -3778,6 +3868,7 @@ var Chartist = {
         {
           options.fillEmptySpace.setChartValues(this.svg, this.eventEmitter, axisX, axisY, _areas, chartRect.x1, chartRect.x2, chartRect.y1, chartRect.y2);
           options.fillEmptySpace.setSerieValues(normalizedData[seriesIndex]);
+          options.fillEmptySpace.setPoints(points);
 
           if (_areas.length === 0)
           {
