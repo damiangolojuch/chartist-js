@@ -144,6 +144,26 @@
     return true;
   }
 
+  function getMinY()
+  {
+    if (this.$$chartMinY) return this.$$chartMinY;
+
+    var chartMinY = Number.MAX_VALUE;
+
+    this.points.forEach(function (p)
+    {
+      if (p.y < chartMinY)
+      {
+        chartMinY = p.y;
+      }
+    });
+
+    chartMinY = (chartMinY == Number.MAX_VALUE)? this.chartMinY : chartMinY;
+
+    this.$$chartMinY = chartMinY;
+    return this.$$chartMinY;
+  }
+
   function hasSerieSpaceLeft()
   {
     return !this.serieValues[0] || (!this.serieValues[1] && this.serieValues[0]);
@@ -154,11 +174,11 @@
     var firstElement = (this.areas.length)? this.areas[0].pathElements[1]: null;
 
     var maxX = (firstElement)? firstElement.x : this.chartMaxX;
-    var maxY = (firstElement)? firstElement.y : this.chartMinY;
+    var maxY = (firstElement)? firstElement.y : this.getMinY();
 
     var self = this;
 
-    return this.preparePoints(this.chartMinX, maxX, this.chartMinY, maxY, function (x1, x2, y1, y2)
+    return this.preparePoints(this.chartMinX, maxX, this.getMinY(), maxY, function (x1, x2, y1, y2)
     {
       var pathString = self.generatePathString(x1, x2, y1, y2);
 
@@ -192,7 +212,7 @@
     lastElement = lastElement[lastElement.length - 2];
 
     var self = this;
-    return this.preparePoints(lastElement.x, this.chartMaxX, lastElement.y, this.chartMinY, function (x1, x2, y1, y2)
+    return this.preparePoints(lastElement.x, this.chartMaxX, lastElement.y, this.getMinY(), function (x1, x2, y1, y2)
     {
       var pathString = self.generatePathString(x1, x2, y1, y2);
 
@@ -490,7 +510,8 @@
     countLineAreas: countLineAreas,
     getNextGradient: getNextGradient,
     emitEmptyPoints: emitEmptyPoints,
-    preparePoints: preparePoints
+    preparePoints: preparePoints,
+    getMinY: getMinY
   });
 
 }(window, document, Chartist));

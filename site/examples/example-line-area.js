@@ -17,8 +17,8 @@ fillLines.setLinesGradient(gradient2);
 new Chartist.Line('.ct-chart', {
   labels: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
   series: [
-    //[null, 1, 9, 2, 7, null, 4, null, null, 5, 4, null]
-    [10, null, 1, 1, null, null, null, null, null, null, null, null]
+    [null, 151, null, null, null, null, 123, null, null, null, null, null]
+    //[10, null, 1, 1, null, null, null, null, null, null, null, null]
     //[null, null, null, null, null, null, null, null, null, null, null, 1]
   ]
 }, {
